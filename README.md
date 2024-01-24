@@ -2,7 +2,7 @@
 
 ## What's this project about
 
-*eurofuels* is an improved version of [eurocombustibles](https://github.com/macolmenerori/eurocombustibles), being this the backend part.
+_eurofuels_ is an improved version of [eurocombustibles](https://github.com/macolmenerori/eurocombustibles), being this the backend part.
 
 Retrieve the fuel prices data from the [EU Weekly Oil Bulletin](https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en), store them on an AWS S3 bucket and display it on a webpage.
 
@@ -13,7 +13,8 @@ For retrieving the data, an AWS Lambda function will be used, which will store t
 ### AWS S3 Bucket
 
 1. Create an S3 Bucket on AWS
-2. Change *Permissions Policy* for the following one (to grant public read permission)
+2. Change _Permissions Policy_ for the following one (to grant public read permission)
+
 ```
 {
     "Version": "2012-10-17",
@@ -27,12 +28,37 @@ For retrieving the data, an AWS Lambda function will be used, which will store t
     ]
 }
 ```
-3. Give public access: disable the *Block public access* option
-4. Change *Object Ownership* to *Bucket Owner Preferred*
-5. Manage ACL (Access Control List): enable *read* to everyone
-6. The AWS S3 Bucket is now set up. Optionally upload the JSON file.
 
-To get the public URL of the file, go to the file and on the *Properties* tab there it is under *Object URL*.
+3. Give public access: disable the _Block public access_ option
+4. Change _Object Ownership_ to _Bucket Owner Preferred_
+5. Manage ACL (Access Control List): enable _read_ to everyone
+6. Add CORS policy (under bucket's permission tab). Without it, data cannot be accessed. It can be in JSON or in XML
+
+```
+[
+  {
+    "AllowedHeaders": ["Authorization"],
+    "AllowedMethods": ["GET"],
+    "AllowedOrigins": ["*"],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+```
+<CORSConfiguration>
+    <CORSRule>
+        <AllowedOrigin>*</AllowedOrigin>
+        <AllowedMethod>GET</AllowedMethod>
+        <MaxAgeSeconds>3000</MaxAgeSeconds>
+        <AllowedHeader>Authorization</AllowedHeader>
+    </CORSRule>
+</CORSConfiguration>
+```
+
+7. The AWS S3 Bucket is now set up. Optionally upload the JSON file.
+
+To get the public URL of the file, go to the file and on the _Properties_ tab there it is under _Object URL_.
 
 ### AWS Layers
 
@@ -74,17 +100,17 @@ Set the following environment variables:
 
 Now apply the four layers previously created (on the code tab at the bottom).
 
-Everything should be ready now, go to test tab and test that it works okay. Go to the S3 Bucket and check that the *last time modified* was updated.
+Everything should be ready now, go to test tab and test that it works okay. Go to the S3 Bucket and check that the _last time modified_ was updated.
 
 ### AWS CloudWatch and EventBridge
 
 Here an event will be created that will trigger the execution of the Lambda Function.
 
 1. Go to CloudWatch → Rules → Events and Create Rule
-2. Give name, description and select *Schedule* as *Event Source*
-3. It will redirect to EventBridge service, where the *Schedule Pattern* will be Recurring Schedule → Cron-based
+2. Give name, description and select _Schedule_ as _Event Source_
+3. It will redirect to EventBridge service, where the _Schedule Pattern_ will be Recurring Schedule → Cron-based
 4. Enter the desired cron expression, for example `0 30 8 ? * WED *` (every Wednesday at 08:30)
-5. In the *Select targets* section choose *Lambda function* as the target type and in the *Function* dropdown, select the Lambda function.
+5. In the _Select targets_ section choose _Lambda function_ as the target type and in the _Function_ dropdown, select the Lambda function.
 6. Select to _not retry_ if fail.
 
 Now the Lambda Function will run on the schedule.
