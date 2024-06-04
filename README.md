@@ -1,5 +1,7 @@
 # eurofuels-back
 
+A frontend for this project has been created: [eurofuels-front](https://github.com/macolmenerori/eurofuels-front)
+
 ## What's this project about
 
 _eurofuels_ is an improved version of [eurocombustibles](https://github.com/macolmenerori/eurocombustibles), being this the backend part.
