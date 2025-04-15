@@ -9,7 +9,7 @@ def lambda_handler(event, context):
     BUCKET_NAME = os.environ.get('BUCKET_NAME')
     FILE_NAME = os.environ.get('FILE_NAME')
 
-    prices_raw = pd.read_excel('http://ec.europa.eu/energy/observatory/reports/latest_prices_with_taxes.xlsx', 'En In EURO', header=8, usecols='B:D', names=['country', 'gasoline', 'diesel'], nrows=27, dtype=str, engine='openpyxl')
+    prices_raw = pd.read_excel('http://energy.ec.europa.eu/document/download/264c2d0f-f161-4ea3-a777-78faae59bea0', 0, header=1, usecols='A:C', names=['country', 'gasoline', 'diesel'], nrows=27, dtype=str, engine='openpyxl')
 
     prices_JSON = prices_raw.to_json(orient='records', force_ascii=False)
 
