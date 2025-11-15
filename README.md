@@ -62,45 +62,53 @@ For retrieving the data, an AWS Lambda function will be used, which will store t
 
 To get the public URL of the file, go to the file and on the _Properties_ tab there it is under _Object URL_.
 
-### AWS Layers
-
-The Lambda function is written in Python and makes use of the following libraries:
-
-- `pandas`
-- `numpy` (pandas dependency)
-- `pytz` (pandas dependency)
-- `openpyxl` (pandas dependency)
-
-These libraries are not installed by default on AWS Python environment, so to set them up a Lambda Layer will be created for each one. These layers will then be applied to the AWS Lambda Function in order to import the libraries.
-
-Follow the following guides to create these layers:
-
-- [pandas and numpy layers](https://github.com/macolmenerori/eurofuels-back/tree/main/guides/pandas_numpy_layers.md)
-- [pytz and openpyxl layers](https://github.com/macolmenerori/eurofuels-back/tree/main/guides/pytz_openpyxl_layers.md)
-
-### AWS credentials
-
-On AWS console go to User Settings → Security credentials and create new Access Keys. A `Key_ID` and a `Secret_Key` are generated, save them to be used on the script.
-
 ### AWS Lambda
 
 The code in charge of retrieving the data from its source and saving it as a JSON file on the S3 Bucket.
 
-Create a Lambda Function with the following params:
+1. Create a Lambda Function with the following params:
 
-- Runtime: `Python 3.9`
+- Runtime: `Python 3.13`
 - Architecture: `x86_64`
+- Memory: `512MB`
+- Timeout: `60s`
 
-On the code editor insert the lambda code and click Deploy button to deploy changes.
+2. Add Pandas Layer `AWSSDKPandas` (name varies with version, serach for it)
 
-Set the following environment variables:
+3. Update the IAM Role. Go to Configuration -> Permissions -> Click on the role -> Add new inline role
 
-- `ACCESS_KEY`: the previously generated `Key_ID`
-- `SECRET_KEY`: the previously generated `Secret_Key`
+```JSON
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": "arn:aws:s3:::your-bucket-name/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    }
+  ]
+}
+```
+
+4. Add the following environment variables:
+
 - `BUCKET_NAME`: the name given to the bucket when it was created
 - `FILE_NAME`: the name of the JSON file to be saved on the bucket
+- `EXCEL_URL`: the URL of the EU Weekly Oil Bulletin, in Excel format
 
-Now apply the four layers previously created (on the code tab at the bottom).
+5. On the code editor insert the lambda code and click Deploy button to deploy changes.
 
 Everything should be ready now, go to test tab and test that it works okay. Go to the S3 Bucket and check that the _last time modified_ was updated.
 
